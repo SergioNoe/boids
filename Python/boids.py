@@ -208,6 +208,17 @@ def strongWind(boid):
     boid["dx"] = boid["dx"] + (windX * windFactor)
     boid["dy"] = boid["dy"] + (windY * windFactor)
 
+
+def killPrey(pred):
+    minDistance = 10
+    killFactor = 0.5
+
+    for otherBoid in boids:
+        if distance(pred, otherBoid) < minDistance:
+            if random.random() > killFactor:
+                boids.remove(otherBoid)
+
+
 # Main loop
 def animationLoop():
     global loopCount
@@ -238,6 +249,7 @@ def animationLoop():
         strongWind(pred)
         limitSpeed(pred)
         keepWithinBounds(pred)
+        killPrey(pred)
 
         # Position updates
         pred["x"] += pred["dx"]
