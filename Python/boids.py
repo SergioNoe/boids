@@ -92,7 +92,7 @@ def flyTowardsCenterPredators(boid):
     numNeighbors = 0
 
     for otherBoid in preds:
-        if distance(boid, otherBoid) < visualRange:
+        if distance(boid, otherBoid) < visualRangePred:
             centerX += otherBoid["x"]
             centerY += otherBoid["y"]
             numNeighbors += 1
@@ -101,8 +101,8 @@ def flyTowardsCenterPredators(boid):
         centerX = centerX / numNeighbors
         centerY = centerY / numNeighbors
 
-        boid["dx"] += (centerX - boid["x"]) * centeringFactor
-        boid["dy"] += (centerY - boid["y"]) * centeringFactor
+        boid["dx"] += (centerX - boid["x"]) * centeringFactorPred
+        boid["dy"] += (centerY - boid["y"]) * centeringFactorPred
 
 
 def avoidOthers(boid):
@@ -145,8 +145,8 @@ def avoidOthersPredators(boid):
                 moveX += boid["x"] - otherBoid["x"]
                 moveY += boid["y"] - otherBoid["y"]
 
-    boid["dx"] += moveX * avoidFactor
-    boid["dy"] += moveY * avoidFactor
+    boid["dx"] += moveX * avoidFactorPred
+    boid["dy"] += moveY * avoidFactorPred
 
 
 def matchVelocity(boid):
@@ -178,17 +178,17 @@ def matchVelocityPredators(boid):
     numNeighbors = 0
 
     for otherBoid in preds:
-        if distance(boid, otherBoid) < visualRange:
+        if distance(boid, otherBoid) < visualRangePred:
             avgDX += otherBoid["dx"]
             avgDY += otherBoid["dy"]
             numNeighbors += 1
 
     if numNeighbors != 0:
-        avgDX = avgDX /numNeighbors
+        avgDX = avgDX / numNeighbors
         avgDY = avgDY / numNeighbors
 
-        boid["dx"] += (avgDX - boid["dx"]) * matchingFactor
-        boid["dy"] += (avgDY - boid["dy"]) * matchingFactor
+        boid["dx"] += (avgDX - boid["dx"]) * matchingFactorPred
+        boid["dy"] += (avgDY - boid["dy"]) * matchingFactorPred
 
     else:
         boid["dx"] += boid["dx"] * 0.5
@@ -271,32 +271,51 @@ def animationLoop():
 
 
 def reset():
+    # Boids variables
     global boids
-    global preds
     global numBoids
-    global numPredators
-    global visualRange
     global centeringFactor
     global avoidFactor
     global matchingFactor
     global avoidPredatorFactor
-    global windX
-    global windY
-    global windFactor
-    global loopCount
+    global visualRange
 
     boids = []
-    preds = []
     numBoids = int(entryBoids.get())
-    numPredators = int(entryPreds.get())
-    visualRange = int(entryVR.get())
     centeringFactor = float(entryCF.get())
     avoidFactor = float(entryAF.get())
     matchingFactor = float(entryMF.get())
     avoidPredatorFactor = float(entryAPF.get())
+    visualRange = int(entryVR.get())
+
+    # Predator variables
+    global preds
+    global numPredators
+    global centeringFactorPred
+    global avoidFactorPred
+    global matchingFactorPred
+    global avoidPredatorFactorPred
+    global visualRangePred
+
+    preds = []
+    numPredators = int(entryPreds.get())
+    centeringFactorPred = float(entryCFPred.get())
+    avoidFactorPred = float(entryAFPred.get())
+    matchingFactorPred = float(entryMFPred.get())
+    avoidPredatorFactorPred = float(entryAPFPred.get())
+    visualRangePred = int(entryVRPred.get())
+
+    # Wind variables
+    global windX
+    global windY
+    global windFactor
+
     windX = float(entryWX.get())
     windY = float(entryWY.get())
     windFactor = float(entryWF.get())
+
+    # Other things
+    global loopCount
     loopCount = 0
 
     initBoids(numBoids)
@@ -333,7 +352,7 @@ trailButton.grid(row=0, column=8)
 
 # Boids title
 labelBoidsTitle = tkinter.Label(root, text="Boids")
-labelBoidsTitle.grid(row=1, column=6, columnspan=4)
+labelBoidsTitle.grid(row=1, column=6, columnspan=6)
 
 # Entry the number of boids
 numBoids = 100
@@ -344,7 +363,7 @@ entryBoids = tkinter.Entry(root, bd=5)
 entryBoids.insert(0, str(numBoids))
 entryBoids.grid(row=2, column=7)
 
-# Entry the centering factor
+# Entry the centering factor for the boids
 centeringFactor = 0.005
 
 labelCF = tkinter.Label(root, text="Coherence:")
@@ -353,58 +372,103 @@ entryCF = tkinter.Entry(root, bd=5)
 entryCF.insert(0, str(centeringFactor))
 entryCF.grid(row=2, column=9)
 
-# Entry the avoid factor
+# Entry the avoid factor for the boids
 avoidFactor = 0.05
 
 labelAF = tkinter.Label(root, text="Separation:")
-labelAF.grid(row=3, column=6)
+labelAF.grid(row=2, column=10)
 entryAF = tkinter.Entry(root, bd=5)
 entryAF.insert(0, str(avoidFactor))
-entryAF.grid(row=3, column=7)
+entryAF.grid(row=2, column=11)
 
-# Entry the match speed factor
+# Entry the match speed factor for the boids
 matchingFactor = 0.05
 
 labelMF = tkinter.Label(root, text="Alignment:")
-labelMF.grid(row=3, column=8)
+labelMF.grid(row=3, column=6)
 entryMF = tkinter.Entry(root, bd=5)
 entryMF.insert(0, str(matchingFactor))
-entryMF.grid(row=3, column=9)
+entryMF.grid(row=3, column=7)
 
-# Entry the avoid predator factor
+# Entry the avoid predator factor for the boids
 avoidPredatorFactor = 0.5
 
 labelAPF = tkinter.Label(root, text="Pred separation:")
-labelAPF.grid(row=4, column=6)
+labelAPF.grid(row=3, column=8)
 entryAPF = tkinter.Entry(root, bd=5)
 entryAPF.insert(0, str(avoidPredatorFactor))
-entryAPF.grid(row=4, column=7)
+entryAPF.grid(row=3, column=9)
 
-# Entry the visual range
+# Entry the visual range for the boids
 visualRange = 75
 
 labelVR = tkinter.Label(root, text="Visual range:")
-labelVR.grid(row=4, column=8)
+labelVR.grid(row=3, column=10)
 entryVR = tkinter.Entry(root, bd=5)
 entryVR.insert(0, str(visualRange))
-entryVR.grid(row=4, column=9)
+entryVR.grid(row=3, column=11)
 
 # Predator title
 labelPredators = tkinter.Label(root, text="Predators")
-labelPredators.grid(row=5, column=6, columnspan=4)
+labelPredators.grid(row=4, column=6, columnspan=6)
 
 # Entry the number of predators
 numPredators = 0
 
 labelPreds = tkinter.Label(root, text="Predators:")
-labelPreds.grid(row=6, column=6)
+labelPreds.grid(row=5, column=6)
 entryPreds = tkinter.Entry(root, bd=5)
 entryPreds.insert(0, str(numPredators))
-entryPreds.grid(row=6, column=7)
+entryPreds.grid(row=5, column=7)
+
+# Entry the centering factor for the predators
+centeringFactorPred = 0.005
+
+labelCFPred = tkinter.Label(root, text="Coherence:")
+labelCFPred.grid(row=5, column=8)
+entryCFPred = tkinter.Entry(root, bd=5)
+entryCFPred.insert(0, str(centeringFactorPred))
+entryCFPred.grid(row=5, column=9)
+
+# Entry the avoid factor for the predators
+avoidFactorPred = 0.05
+
+labelAFPred = tkinter.Label(root, text="Separation:")
+labelAFPred.grid(row=5, column=10)
+entryAFPred = tkinter.Entry(root, bd=5)
+entryAFPred.insert(0, str(avoidFactorPred))
+entryAFPred.grid(row=5, column=11)
+
+# Entry the match speed factor for the predators
+matchingFactorPred = 0.05
+
+labelMFPred = tkinter.Label(root, text="Alignment:")
+labelMFPred.grid(row=6, column=6)
+entryMFPred = tkinter.Entry(root, bd=5)
+entryMFPred.insert(0, str(matchingFactorPred))
+entryMFPred.grid(row=6, column=7)
+
+# Entry the avoid predator factor for the predators
+avoidPredatorFactorPred = 0.5
+
+labelAPFPred = tkinter.Label(root, text="Pred separation:")
+labelAPFPred.grid(row=6, column=8)
+entryAPFPred = tkinter.Entry(root, bd=5)
+entryAPFPred.insert(0, str(avoidPredatorFactorPred))
+entryAPFPred.grid(row=6, column=9)
+
+# Entry the visual range for the predators
+visualRangePred = 75
+
+labelVRPred = tkinter.Label(root, text="Visual range:")
+labelVRPred.grid(row=6, column=10)
+entryVRPred = tkinter.Entry(root, bd=5)
+entryVRPred.insert(0, str(visualRangePred))
+entryVRPred.grid(row=6, column=11)
 
 # Wind title
 labelWind = tkinter.Label(root, text="Wind")
-labelWind.grid(row=7, column=6, columnspan=4)
+labelWind.grid(row=7, column=6, columnspan=6)
 
 # Entry the wind X direction
 windX = 1
@@ -428,10 +492,10 @@ entryWY.grid(row=8, column=9)
 windFactor = 0
 
 labelWF = tkinter.Label(root, text="Wind force:")
-labelWF.grid(row=9, column=6)
+labelWF.grid(row=8, column=10)
 entryWF = tkinter.Entry(root, bd=5)
 entryWF.insert(0, str(windFactor))
-entryWF.grid(row=9, column=7)
+entryWF.grid(row=8, column=11)
 
 # Obtain first batch of boids and predators
 initBoids(numBoids)
