@@ -318,109 +318,120 @@ root = tkinter.Tk()
 
 # create canvas
 myCanvas = tkinter.Canvas(root, bg="white", height=height, width=width)
-myCanvas.grid(row=0, column=0, columnspan=5)
+myCanvas.grid(row=0, column=0, columnspan=5, rowspan=20)
 
 # Reset button
 resetButton = tkinter.Button(root, text="Reset", command=reset)
-resetButton.grid(row=1, column=0)
-
-# Entry the number of boids
-numBoids = 100
-
-labelBoids = tkinter.Label(root, text="Boids:")
-labelBoids.grid(row=1, column=1)
-entryBoids = tkinter.Entry(root, bd=5)
-entryBoids.insert(0, str(numBoids))
-entryBoids.grid(row=1, column=2)
-
-# Entry the number of boids
-numPredators = 1
-
-labelPreds = tkinter.Label(root, text="Predators:")
-labelPreds.grid(row=1, column=3)
-entryPreds = tkinter.Entry(root, bd=5)
-entryPreds.insert(0, str(numPredators))
-entryPreds.grid(row=1, column=4)
-
-# Entry the centering factor
-centeringFactor = 0.005
-
-labelCF = tkinter.Label(root, text="Coherence:")
-labelCF.grid(row=2, column=1)
-entryCF = tkinter.Entry(root, bd=5)
-entryCF.insert(0, str(centeringFactor))
-entryCF.grid(row=2, column=2)
-
-# Entry the avoid factor
-avoidFactor = 0.05
-
-labelAF = tkinter.Label(root, text="Separation:")
-labelAF.grid(row=2, column=3)
-entryAF = tkinter.Entry(root, bd=5)
-entryAF.insert(0, str(avoidFactor))
-entryAF.grid(row=2, column=4)
-
-# Entry the match speed factor
-matchingFactor = 0.05
-
-labelMF = tkinter.Label(root, text="Alignment:")
-labelMF.grid(row=3, column=1)
-entryMF = tkinter.Entry(root, bd=5)
-entryMF.insert(0, str(matchingFactor))
-entryMF.grid(row=3, column=2)
-
-# Entry the avoid predator factor
-avoidPredatorFactor = 0.5
-
-labelAPF = tkinter.Label(root, text="Pred separation:")
-labelAPF.grid(row=3, column=3)
-entryAPF = tkinter.Entry(root, bd=5)
-entryAPF.insert(0, str(avoidPredatorFactor))
-entryAPF.grid(row=3, column=4)
-
-# Entry the wind X direction
-windX = 1
-
-labelWX = tkinter.Label(root, text="Wind X:")
-labelWX.grid(row=4, column=1)
-entryWX = tkinter.Entry(root, bd=5)
-entryWX.insert(0, str(windX))
-entryWX.grid(row=4, column=2)
-
-# Entry the wind Y direction
-windY = 1
-
-labelWY = tkinter.Label(root, text="Wind Y:")
-labelWY.grid(row=4, column=3)
-entryWY = tkinter.Entry(root, bd=5)
-entryWY.insert(0, str(windY))
-entryWY.grid(row=4, column=4)
-
-# Entry the wind factor
-windFactor = 0
-
-labelWF = tkinter.Label(root, text="Wind force:")
-labelWF.grid(row=5, column=1)
-entryWF = tkinter.Entry(root, bd=5)
-entryWF.insert(0, str(windFactor))
-entryWF.grid(row=5, column=2)
-
-# Entry the visual range
-visualRange = 75
-
-labelVR = tkinter.Label(root, text="Visual range:")
-labelVR.grid(row=5, column=3)
-entryVR = tkinter.Entry(root, bd=5)
-entryVR.insert(0, str(visualRange))
-entryVR.grid(row=5, column=4)
+resetButton.grid(row=0, column=7)
 
 # Trail
 draw_trail = False
 loopCount = 0
 
 trailButton = tkinter.Button(root, text="Trails", command=drawTrail)
-trailButton.grid(row=2, column=0)
+trailButton.grid(row=0, column=8)
 
+# Boids title
+labelBoidsTitle = tkinter.Label(root, text="Boids")
+labelBoidsTitle.grid(row=1, column=6, columnspan=4)
+
+# Entry the number of boids
+numBoids = 100
+
+labelBoids = tkinter.Label(root, text="Boids:")
+labelBoids.grid(row=2, column=6)
+entryBoids = tkinter.Entry(root, bd=5)
+entryBoids.insert(0, str(numBoids))
+entryBoids.grid(row=2, column=7)
+
+# Entry the centering factor
+centeringFactor = 0.005
+
+labelCF = tkinter.Label(root, text="Coherence:")
+labelCF.grid(row=2, column=8)
+entryCF = tkinter.Entry(root, bd=5)
+entryCF.insert(0, str(centeringFactor))
+entryCF.grid(row=2, column=9)
+
+# Entry the avoid factor
+avoidFactor = 0.05
+
+labelAF = tkinter.Label(root, text="Separation:")
+labelAF.grid(row=3, column=6)
+entryAF = tkinter.Entry(root, bd=5)
+entryAF.insert(0, str(avoidFactor))
+entryAF.grid(row=3, column=7)
+
+# Entry the match speed factor
+matchingFactor = 0.05
+
+labelMF = tkinter.Label(root, text="Alignment:")
+labelMF.grid(row=3, column=8)
+entryMF = tkinter.Entry(root, bd=5)
+entryMF.insert(0, str(matchingFactor))
+entryMF.grid(row=3, column=9)
+
+# Entry the avoid predator factor
+avoidPredatorFactor = 0.5
+
+labelAPF = tkinter.Label(root, text="Pred separation:")
+labelAPF.grid(row=4, column=6)
+entryAPF = tkinter.Entry(root, bd=5)
+entryAPF.insert(0, str(avoidPredatorFactor))
+entryAPF.grid(row=4, column=7)
+
+# Entry the visual range
+visualRange = 75
+
+labelVR = tkinter.Label(root, text="Visual range:")
+labelVR.grid(row=4, column=8)
+entryVR = tkinter.Entry(root, bd=5)
+entryVR.insert(0, str(visualRange))
+entryVR.grid(row=4, column=9)
+
+# Predator title
+labelPredators = tkinter.Label(root, text="Predators")
+labelPredators.grid(row=5, column=6, columnspan=4)
+
+# Entry the number of predators
+numPredators = 0
+
+labelPreds = tkinter.Label(root, text="Predators:")
+labelPreds.grid(row=6, column=6)
+entryPreds = tkinter.Entry(root, bd=5)
+entryPreds.insert(0, str(numPredators))
+entryPreds.grid(row=6, column=7)
+
+# Wind title
+labelWind = tkinter.Label(root, text="Wind")
+labelWind.grid(row=7, column=6, columnspan=4)
+
+# Entry the wind X direction
+windX = 1
+
+labelWX = tkinter.Label(root, text="Wind X:")
+labelWX.grid(row=8, column=6)
+entryWX = tkinter.Entry(root, bd=5)
+entryWX.insert(0, str(windX))
+entryWX.grid(row=8, column=7)
+
+# Entry the wind Y direction
+windY = 1
+
+labelWY = tkinter.Label(root, text="Wind Y:")
+labelWY.grid(row=8, column=8)
+entryWY = tkinter.Entry(root, bd=5)
+entryWY.insert(0, str(windY))
+entryWY.grid(row=8, column=9)
+
+# Entry the wind factor
+windFactor = 0
+
+labelWF = tkinter.Label(root, text="Wind force:")
+labelWF.grid(row=9, column=6)
+entryWF = tkinter.Entry(root, bd=5)
+entryWF.insert(0, str(windFactor))
+entryWF.grid(row=9, column=7)
 
 # Obtain first batch of boids and predators
 initBoids(numBoids)
