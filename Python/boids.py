@@ -124,6 +124,7 @@ def limitSpeed(boid):
 
 # Main loop
 def animationLoop():
+    global loopCount
 
     # Update each boid
     for boid in boids:
@@ -147,8 +148,12 @@ def animationLoop():
                              boid["x"] + 10, boid["y"] + 10,
                              fill="blue")
 
+        if (draw_trail) and loopCount > 1:
+            myCanvas.create_line(boid["history"])
+
     # Next loop
     time.sleep(0.009)
+    loopCount += 1
     root.update()
     animationLoop()
 
@@ -160,6 +165,7 @@ def reset():
     global centeringFactor
     global avoidFactor
     global matchingFactor
+    global loopCount
 
     boids = []
     numBoids = int(entryBoids.get())
@@ -167,8 +173,19 @@ def reset():
     centeringFactor = float(entryCF.get())
     avoidFactor = float(entryAF.get())
     matchingFactor = float(entryMF.get())
+    loopCount = 0
 
     initBoids(numBoids)
+
+
+def drawTrail():
+    global draw_trail
+
+    if not draw_trail:
+        draw_trail = True
+
+    else:
+        draw_trail = False
 
 
 # init tk
@@ -226,6 +243,14 @@ labelVR.grid(row=3, column=1)
 entryVR = tkinter.Entry(root, bd=5)
 entryVR.insert(0, str(visualRange))
 entryVR.grid(row=3, column=2)
+
+# Trail
+draw_trail = False
+loopCount = 0
+
+trailButton = tkinter.Button(root, text="Trail", command=drawTrail)
+trailButton.grid(row=2, column=0)
+
 
 # Obtain first batch of boids
 initBoids(numBoids)
