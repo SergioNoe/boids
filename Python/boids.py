@@ -68,8 +68,6 @@ def keepWithinBounds(boid):
 
 
 def flyTowardsCenter(boid):
-    #centeringFactor = 0.005
-
     centerX = 0
     centerY = 0
     numNeighbors = 0
@@ -88,9 +86,27 @@ def flyTowardsCenter(boid):
         boid["dy"] += (centerY - boid["y"]) * centeringFactor
 
 
+def flyTowardsCenterPredators(boid):
+    centerX = 0
+    centerY = 0
+    numNeighbors = 0
+
+    for otherBoid in preds:
+        if distance(boid, otherBoid) < visualRange:
+            centerX += otherBoid["x"]
+            centerY += otherBoid["y"]
+            numNeighbors += 1
+
+    if numNeighbors != 0:
+        centerX = centerX / numNeighbors
+        centerY = centerY / numNeighbors
+
+        boid["dx"] += (centerX - boid["x"]) * centeringFactor
+        boid["dy"] += (centerY - boid["y"]) * centeringFactor
+
+
 def avoidOthers(boid):
     minDistance = 20
-    #avoidFactor = 0.05
     moveX = 0
     moveY = 0
 
@@ -106,7 +122,6 @@ def avoidOthers(boid):
 
 def avoidPredators(boid):
     minDistance = 40
-    #avoidPredatorFactor = 0.05
     moveX = 0
     moveY = 0
 
@@ -119,10 +134,22 @@ def avoidPredators(boid):
     boid["dy"] += moveY * avoidPredatorFactor
 
 
+def avoidOthersPredators(boid):
+    minDistance = 20
+    moveX = 0
+    moveY = 0
+
+    for otherBoid in preds:
+        if otherBoid != boid:
+            if distance(boid, otherBoid) < minDistance:
+                moveX += boid["x"] - otherBoid["x"]
+                moveY += boid["y"] - otherBoid["y"]
+
+    boid["dx"] += moveX * avoidFactor
+    boid["dy"] += moveY * avoidFactor
+
 
 def matchVelocity(boid):
-    #matchingFactor = 0.05
-
     avgDX = 0
     avgDY = 0
     numNeighbors = 0
@@ -140,6 +167,33 @@ def matchVelocity(boid):
         boid["dx"] += (avgDX - boid["dx"]) * matchingFactor
         boid["dy"] += (avgDY - boid["dy"]) * matchingFactor
 
+    else:
+        boid["dx"] += boid["dx"] * 0.5
+        boid["dy"] += boid["dy"] * 0.5
+
+
+def matchVelocityPredators(boid):
+    avgDX = 0
+    avgDY = 0
+    numNeighbors = 0
+
+    for otherBoid in preds:
+        if distance(boid, otherBoid) < visualRange:
+            avgDX += otherBoid["dx"]
+            avgDY += otherBoid["dy"]
+            numNeighbors += 1
+
+    if numNeighbors != 0:
+        avgDX = avgDX /numNeighbors
+        avgDY = avgDY / numNeighbors
+
+        boid["dx"] += (avgDX - boid["dx"]) * matchingFactor
+        boid["dy"] += (avgDY - boid["dy"]) * matchingFactor
+
+    else:
+        boid["dx"] += boid["dx"] * 0.5
+        boid["dy"] += boid["dy"] * 0.5
+
 
 def limitSpeed(boid):
     speedLimit = 15
@@ -149,6 +203,10 @@ def limitSpeed(boid):
         boid["dx"] = (boid["dx"] / speed) * speedLimit
         boid["dy"] = (boid["dy"] / speed) * speedLimit
 
+
+def strongWind(boid):
+    boid["dx"] = boid["dx"] + (windX * windFactor)
+    boid["dy"] = boid["dy"] + (windY * windFactor)
 
 # Main loop
 def animationLoop():
@@ -161,6 +219,7 @@ def animationLoop():
         avoidOthers(boid)
         avoidPredators(boid)
         matchVelocity(boid)
+        strongWind(boid)
         limitSpeed(boid)
         keepWithinBounds(boid)
 
@@ -173,9 +232,10 @@ def animationLoop():
     # Update each predator
     for pred in preds:
         # Velocity updates
-        flyTowardsCenter(pred)
-        avoidOthers(pred)
-        matchVelocity(pred)
+        flyTowardsCenterPredators(pred)
+        avoidOthersPredators(pred)
+        matchVelocityPredators(pred)
+        strongWind(pred)
         limitSpeed(pred)
         keepWithinBounds(pred)
 
@@ -220,6 +280,9 @@ def reset():
     global avoidFactor
     global matchingFactor
     global avoidPredatorFactor
+    global windX
+    global windY
+    global windFactor
     global loopCount
 
     boids = []
@@ -231,6 +294,9 @@ def reset():
     avoidFactor = float(entryAF.get())
     matchingFactor = float(entryMF.get())
     avoidPredatorFactor = float(entryAPF.get())
+    windX = float(entryWX.get())
+    windY = float(entryWY.get())
+    windFactor = float(entryWF.get())
     loopCount = 0
 
     initBoids(numBoids)
@@ -312,20 +378,47 @@ entryAPF = tkinter.Entry(root, bd=5)
 entryAPF.insert(0, str(avoidPredatorFactor))
 entryAPF.grid(row=3, column=4)
 
+# Entry the wind X direction
+windX = 1
+
+labelWX = tkinter.Label(root, text="Wind X:")
+labelWX.grid(row=4, column=1)
+entryWX = tkinter.Entry(root, bd=5)
+entryWX.insert(0, str(windX))
+entryWX.grid(row=4, column=2)
+
+# Entry the wind Y direction
+windY = 1
+
+labelWY = tkinter.Label(root, text="Wind Y:")
+labelWY.grid(row=4, column=3)
+entryWY = tkinter.Entry(root, bd=5)
+entryWY.insert(0, str(windY))
+entryWY.grid(row=4, column=4)
+
+# Entry the wind factor
+windFactor = 0
+
+labelWF = tkinter.Label(root, text="Wind force:")
+labelWF.grid(row=5, column=1)
+entryWF = tkinter.Entry(root, bd=5)
+entryWF.insert(0, str(windFactor))
+entryWF.grid(row=5, column=2)
+
 # Entry the visual range
 visualRange = 75
 
 labelVR = tkinter.Label(root, text="Visual range:")
-labelVR.grid(row=4, column=3)
+labelVR.grid(row=5, column=3)
 entryVR = tkinter.Entry(root, bd=5)
 entryVR.insert(0, str(visualRange))
-entryVR.grid(row=4, column=4)
+entryVR.grid(row=5, column=4)
 
 # Trail
 draw_trail = False
 loopCount = 0
 
-trailButton = tkinter.Button(root, text="Trail", command=drawTrail)
+trailButton = tkinter.Button(root, text="Trails", command=drawTrail)
 trailButton.grid(row=2, column=0)
 
 
