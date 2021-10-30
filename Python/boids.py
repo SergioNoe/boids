@@ -263,6 +263,9 @@ def animationLoop():
         if (draw_trail) and loopCount > 1:
             myCanvas.create_line(pred["history"])
 
+    labelNumBoids.config(text=str(len(boids)))
+    labelNumPreds.config(text=str(len(preds)))
+
     # Next loop
     time.sleep(0.01)
     loopCount += 1
@@ -496,6 +499,22 @@ labelWF.grid(row=8, column=10)
 entryWF = tkinter.Entry(root, bd=5)
 entryWF.insert(0, str(windFactor))
 entryWF.grid(row=8, column=11)
+
+# Statistics title
+labelWind = tkinter.Label(root, text="Statistics")
+labelWind.grid(row=9, column=6, columnspan=6)
+
+# Boids numbers in screen
+labelShowBoids = tkinter.Label(root, text="Boids:")
+labelShowBoids.grid(row=10, column=6)
+labelNumBoids = tkinter.Label(root, text=str(len(boids)))
+labelNumBoids.grid(row=10, column=7)
+
+# Predator numbers in screen
+labelShowPreds = tkinter.Label(root, text="Preds:")
+labelShowPreds.grid(row=10, column=8)
+labelNumPreds = tkinter.Label(root, text=str(len(preds)))
+labelNumPreds.grid(row=10, column=9)
 
 # Obtain first batch of boids and predators
 initBoids(numBoids)
