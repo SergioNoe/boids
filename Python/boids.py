@@ -253,7 +253,7 @@ def animationLoop():
                              fill="blue")
 
         if (draw_trail) and loopCount > 1:
-            myCanvas.create_line(boid["history"])
+            myCanvas.create_line(boid["history"], fill="blue")
 
     for pred in preds:
         myCanvas.create_oval(pred["x"], pred["y"],
@@ -261,7 +261,7 @@ def animationLoop():
                              fill="red")
 
         if (draw_trail) and loopCount > 1:
-            myCanvas.create_line(pred["history"])
+            myCanvas.create_line(pred["history"], fill="red")
 
     labelNumBoids.config(text=str(len(boids)))
     labelNumPreds.config(text=str(len(preds)))
