@@ -6,11 +6,23 @@ width = 900
 height = 800
 
 boids = []
+preds = []
 
 
 def initBoids(numBoids):
     for i in range(numBoids):
         boids.append( {
+            "x": random.random() * width,
+            "y": random.random() * height,
+            "dx": random.random() * 10 - 5,
+            "dy": random.random() * 10 - 5,
+            "history": [],
+        } )
+
+
+def initPredators(numPredators):
+    for i in range(numPredators):
+        preds.append( {
             "x": random.random() * width,
             "y": random.random() * height,
             "dx": random.random() * 10 - 5,
@@ -92,6 +104,22 @@ def avoidOthers(boid):
     boid["dy"] += moveY * avoidFactor
 
 
+def avoidPredators(boid):
+    minDistance = 40
+    #avoidPredatorFactor = 0.05
+    moveX = 0
+    moveY = 0
+
+    for pred in preds:
+        if distance(boid, pred) < minDistance:
+            moveX += boid["x"] - pred["x"]
+            moveY += boid["y"] - pred["y"]
+
+    boid["dx"] += moveX * avoidPredatorFactor
+    boid["dy"] += moveY * avoidPredatorFactor
+
+
+
 def matchVelocity(boid):
     #matchingFactor = 0.05
 
@@ -131,6 +159,7 @@ def animationLoop():
         # Velocity updates
         flyTowardsCenter(boid)
         avoidOthers(boid)
+        avoidPredators(boid)
         matchVelocity(boid)
         limitSpeed(boid)
         keepWithinBounds(boid)
@@ -141,7 +170,22 @@ def animationLoop():
         boid["history"].append((boid["x"], boid["y"]))
         boid["history"] = boid["history"][-50:]
 
-    # Clear the canvas and redraw all the boids with their new positions
+    # Update each predator
+    for pred in preds:
+        # Velocity updates
+        flyTowardsCenter(pred)
+        avoidOthers(pred)
+        matchVelocity(pred)
+        limitSpeed(pred)
+        keepWithinBounds(pred)
+
+        # Position updates
+        pred["x"] += pred["dx"]
+        pred["y"] += pred["dy"]
+        pred["history"].append((pred["x"], pred["y"]))
+        pred["history"] = pred["history"][-50:]
+
+    # Clear the canvas and redraw all the boids and predators with their new positions
     myCanvas.delete("all")
     for boid in boids:
         myCanvas.create_oval(boid["x"], boid["y"],
@@ -151,8 +195,16 @@ def animationLoop():
         if (draw_trail) and loopCount > 1:
             myCanvas.create_line(boid["history"])
 
+    for pred in preds:
+        myCanvas.create_oval(pred["x"], pred["y"],
+                             pred["x"] + 10, pred["y"] + 10,
+                             fill="red")
+
+        if (draw_trail) and loopCount > 1:
+            myCanvas.create_line(pred["history"])
+
     # Next loop
-    time.sleep(0.009)
+    time.sleep(0.01)
     loopCount += 1
     root.update()
     animationLoop()
@@ -160,22 +212,29 @@ def animationLoop():
 
 def reset():
     global boids
+    global preds
     global numBoids
+    global numPredators
     global visualRange
     global centeringFactor
     global avoidFactor
     global matchingFactor
+    global avoidPredatorFactor
     global loopCount
 
     boids = []
+    preds = []
     numBoids = int(entryBoids.get())
+    numPredators = int(entryPreds.get())
     visualRange = int(entryVR.get())
     centeringFactor = float(entryCF.get())
     avoidFactor = float(entryAF.get())
     matchingFactor = float(entryMF.get())
+    avoidPredatorFactor = float(entryAPF.get())
     loopCount = 0
 
     initBoids(numBoids)
+    initPredators(numPredators)
 
 
 def drawTrail():
@@ -208,41 +267,59 @@ entryBoids = tkinter.Entry(root, bd=5)
 entryBoids.insert(0, str(numBoids))
 entryBoids.grid(row=1, column=2)
 
+# Entry the number of boids
+numPredators = 1
+
+labelPreds = tkinter.Label(root, text="Predators:")
+labelPreds.grid(row=1, column=3)
+entryPreds = tkinter.Entry(root, bd=5)
+entryPreds.insert(0, str(numPredators))
+entryPreds.grid(row=1, column=4)
+
 # Entry the centering factor
 centeringFactor = 0.005
 
 labelCF = tkinter.Label(root, text="Coherence:")
-labelCF.grid(row=1, column=3)
+labelCF.grid(row=2, column=1)
 entryCF = tkinter.Entry(root, bd=5)
 entryCF.insert(0, str(centeringFactor))
-entryCF.grid(row=1, column=4)
+entryCF.grid(row=2, column=2)
 
 # Entry the avoid factor
 avoidFactor = 0.05
 
 labelAF = tkinter.Label(root, text="Separation:")
-labelAF.grid(row=2, column=1)
+labelAF.grid(row=2, column=3)
 entryAF = tkinter.Entry(root, bd=5)
 entryAF.insert(0, str(avoidFactor))
-entryAF.grid(row=2, column=2)
+entryAF.grid(row=2, column=4)
 
 # Entry the match speed factor
 matchingFactor = 0.05
 
 labelMF = tkinter.Label(root, text="Alignment:")
-labelMF.grid(row=2, column=3)
+labelMF.grid(row=3, column=1)
 entryMF = tkinter.Entry(root, bd=5)
 entryMF.insert(0, str(matchingFactor))
-entryMF.grid(row=2, column=4)
+entryMF.grid(row=3, column=2)
+
+# Entry the avoid predator factor
+avoidPredatorFactor = 0.5
+
+labelAPF = tkinter.Label(root, text="Pred separation:")
+labelAPF.grid(row=3, column=3)
+entryAPF = tkinter.Entry(root, bd=5)
+entryAPF.insert(0, str(avoidPredatorFactor))
+entryAPF.grid(row=3, column=4)
 
 # Entry the visual range
 visualRange = 75
 
 labelVR = tkinter.Label(root, text="Visual range:")
-labelVR.grid(row=3, column=1)
+labelVR.grid(row=4, column=3)
 entryVR = tkinter.Entry(root, bd=5)
 entryVR.insert(0, str(visualRange))
-entryVR.grid(row=3, column=2)
+entryVR.grid(row=4, column=4)
 
 # Trail
 draw_trail = False
@@ -252,8 +329,9 @@ trailButton = tkinter.Button(root, text="Trail", command=drawTrail)
 trailButton.grid(row=2, column=0)
 
 
-# Obtain first batch of boids
+# Obtain first batch of boids and predators
 initBoids(numBoids)
+initPredators(numPredators)
 
 # Start the loop
 animationLoop()
