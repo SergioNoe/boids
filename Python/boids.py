@@ -2,11 +2,8 @@ import random
 import tkinter
 import time
 
-width = 900;
-height = 800;
-
-numBoids = 100
-visualRange = 75
+width = 900
+height = 800
 
 boids = []
 
@@ -21,11 +18,13 @@ def initBoids(numBoids):
             "history": [],
         } )
 
+
 def distance(boid1, boid2):
     number = ( (boid1["x"] - boid2["x"]) * (boid1["x"] - boid2["x"]) +
                (boid1["y"] - boid2["y"]) * (boid1["y"] - boid2["y"])
              ) ** (1/2)
     return number
+
 
 def nClosestBoids(boid, n):
 
@@ -37,6 +36,7 @@ def nClosestBoids(boid, n):
 
     # Return the "n" closest
     return newBoids2[0:n+1]
+
 
 def keepWithinBounds(boid):
     margin = 200
@@ -54,8 +54,9 @@ def keepWithinBounds(boid):
     if boid["y"] > (height - margin):
         boid["dy"] -= turnFactor
 
+
 def flyTowardsCenter(boid):
-    centeringFactor = 0.005
+    #centeringFactor = 0.005
 
     centerX = 0
     centerY = 0
@@ -74,9 +75,10 @@ def flyTowardsCenter(boid):
         boid["dx"] += (centerX - boid["x"]) * centeringFactor
         boid["dy"] += (centerY - boid["y"]) * centeringFactor
 
+
 def avoidOthers(boid):
     minDistance = 20
-    avoidFactor = 0.05
+    #avoidFactor = 0.05
     moveX = 0
     moveY = 0
 
@@ -89,8 +91,9 @@ def avoidOthers(boid):
     boid["dx"] += moveX * avoidFactor
     boid["dy"] += moveY * avoidFactor
 
+
 def matchVelocity(boid):
-    matchingFactor = 0.05
+    #matchingFactor = 0.05
 
     avgDX = 0
     avgDY = 0
@@ -107,7 +110,8 @@ def matchVelocity(boid):
         avgDY = avgDY / numNeighbors
 
         boid["dx"] += (avgDX - boid["dx"]) * matchingFactor
-        boid["dy"] += (avgDX - boid["dy"]) * matchingFactor
+        boid["dy"] += (avgDY - boid["dy"]) * matchingFactor
+
 
 def limitSpeed(boid):
     speedLimit = 15
@@ -144,8 +148,27 @@ def animationLoop():
                              fill="blue")
 
     # Next loop
+    time.sleep(0.009)
     root.update()
     animationLoop()
+
+
+def reset():
+    global boids
+    global numBoids
+    global visualRange
+    global centeringFactor
+    global avoidFactor
+    global matchingFactor
+
+    boids = []
+    numBoids = int(entryBoids.get())
+    visualRange = int(entryVR.get())
+    centeringFactor = float(entryCF.get())
+    avoidFactor = float(entryAF.get())
+    matchingFactor = float(entryMF.get())
+
+    initBoids(numBoids)
 
 
 # init tk
@@ -153,10 +176,61 @@ root = tkinter.Tk()
 
 # create canvas
 myCanvas = tkinter.Canvas(root, bg="white", height=height, width=width)
-myCanvas.pack()
+myCanvas.grid(row=0, column=0, columnspan=5)
 
+# Reset button
+resetButton = tkinter.Button(root, text="Reset", command=reset)
+resetButton.grid(row=1, column=0)
+
+# Entry the number of boids
+numBoids = 100
+
+labelBoids = tkinter.Label(root, text="Boids:")
+labelBoids.grid(row=1, column=1)
+entryBoids = tkinter.Entry(root, bd=5)
+entryBoids.insert(0, str(numBoids))
+entryBoids.grid(row=1, column=2)
+
+# Entry the centering factor
+centeringFactor = 0.005
+
+labelCF = tkinter.Label(root, text="Coherence:")
+labelCF.grid(row=1, column=3)
+entryCF = tkinter.Entry(root, bd=5)
+entryCF.insert(0, str(centeringFactor))
+entryCF.grid(row=1, column=4)
+
+# Entry the avoid factor
+avoidFactor = 0.05
+
+labelAF = tkinter.Label(root, text="Separation:")
+labelAF.grid(row=2, column=1)
+entryAF = tkinter.Entry(root, bd=5)
+entryAF.insert(0, str(avoidFactor))
+entryAF.grid(row=2, column=2)
+
+# Entry the match speed factor
+matchingFactor = 0.05
+
+labelMF = tkinter.Label(root, text="Alignment:")
+labelMF.grid(row=2, column=3)
+entryMF = tkinter.Entry(root, bd=5)
+entryMF.insert(0, str(matchingFactor))
+entryMF.grid(row=2, column=4)
+
+# Entry the visual range
+visualRange = 75
+
+labelVR = tkinter.Label(root, text="Visual range:")
+labelVR.grid(row=3, column=1)
+entryVR = tkinter.Entry(root, bd=5)
+entryVR.insert(0, str(visualRange))
+entryVR.grid(row=3, column=2)
+
+# Obtain first batch of boids
 initBoids(numBoids)
 
+# Start the loop
 animationLoop()
 
 # Show
