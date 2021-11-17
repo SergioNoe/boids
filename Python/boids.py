@@ -38,6 +38,21 @@ def distance(boid1, boid2):
     return number
 
 
+def distanceWithTuples(tuple1, tuple2):
+    number = ((tuple1[0] - tuple2[0]) * (tuple1[0] - tuple2[0]) +
+              (tuple1[1] - tuple2[1]) * (tuple1[1] - tuple2[1])
+              ) ** (1 / 2)
+    return number
+
+def averageDistanceInTime(boid1, boid2):
+    distanceList = []
+
+    for i in range(5):
+        distanceList.append(distanceWithTuples(boid1["history"][-i], boid2["history"][-i]))
+
+    return sum(distanceList)/len(distanceList)
+
+
 def nClosestBoids(boid, n):
 
     # Copy of the boids list
@@ -219,12 +234,36 @@ def killPrey(pred):
                 boids.remove(otherBoid)
 
 
+def reproductionBoid(boids):
+    global loopCount
+    if loopCount > 1 and len(boids[0]["history"]) > 5:
+        for boid in boids:
+            closest = nClosestBoids(boid, 1)[-1]
+            if len(boid["history"]) > 5 and len(closest["history"]) > 5:
+                final_dist = averageDistanceInTime(boid, closest)
+
+                if final_dist <= reproductionRatio:
+                    mx = (boid["x"] + closest["x"]) / 2
+                    my = (boid["y"] + closest["y"]) / 2
+                    mdx = (boid["dx"] + closest["dx"]) / 2
+                    mdy = (boid["dy"] + closest["dy"]) / 2
+
+                    boids.append({
+                        "x": mx,
+                        "y": my,
+                        "dx": mdx,
+                        "dy": mdy,
+                        "history": [],
+                    })
+
+
 def updateBoids(boids):
     for boid in boids:
         # Velocity updates
         flyTowardsCenter(boid)
         avoidOthers(boid)
         avoidPredators(boid)
+        reproductionBoid(boids)
         matchVelocity(boid)
         strongWind(boid)
         limitSpeed(boid)
@@ -297,6 +336,7 @@ def reset():
     global matchingFactor
     global avoidPredatorFactor
     global visualRange
+    global reproductionRatio
 
     boids = []
     numBoids = int(entryBoids.get())
@@ -305,6 +345,7 @@ def reset():
     matchingFactor = float(entryMF.get())
     avoidPredatorFactor = float(entryAPF.get())
     visualRange = int(entryVR.get())
+    reproductionRatio = int(entryRR.get())
 
     # Predator variables
     global preds
@@ -373,7 +414,7 @@ labelBoidsTitle = tkinter.Label(root, text="Boids")
 labelBoidsTitle.grid(row=1, column=6, columnspan=6)
 
 # Entry the number of boids
-numBoids = 100
+numBoids = 10
 
 labelBoids = tkinter.Label(root, text="Boids:")
 labelBoids.grid(row=2, column=6)
@@ -426,110 +467,119 @@ entryVR = tkinter.Entry(root, bd=5)
 entryVR.insert(0, str(visualRange))
 entryVR.grid(row=3, column=11)
 
+# Entry the necessary loops to start reproduction in boids
+reproductionRatio = 2
+
+labelRR = tkinter.Label(root, text="Reproduction ratio:")
+labelRR.grid(row=4, column=6)
+entryRR = tkinter.Entry(root, bd=5)
+entryRR.insert(0, str(reproductionRatio))
+entryRR.grid(row=4, column=7)
+
 # Predator title
 labelPredators = tkinter.Label(root, text="Predators")
-labelPredators.grid(row=4, column=6, columnspan=6)
+labelPredators.grid(row=5, column=6, columnspan=6)
 
 # Entry the number of predators
 numPredators = 0
 
 labelPreds = tkinter.Label(root, text="Predators:")
-labelPreds.grid(row=5, column=6)
+labelPreds.grid(row=6, column=6)
 entryPreds = tkinter.Entry(root, bd=5)
 entryPreds.insert(0, str(numPredators))
-entryPreds.grid(row=5, column=7)
+entryPreds.grid(row=6, column=7)
 
 # Entry the centering factor for the predators
 centeringFactorPred = 0.005
 
 labelCFPred = tkinter.Label(root, text="Coherence:")
-labelCFPred.grid(row=5, column=8)
+labelCFPred.grid(row=6, column=8)
 entryCFPred = tkinter.Entry(root, bd=5)
 entryCFPred.insert(0, str(centeringFactorPred))
-entryCFPred.grid(row=5, column=9)
+entryCFPred.grid(row=6, column=9)
 
 # Entry the avoid factor for the predators
 avoidFactorPred = 0.05
 
 labelAFPred = tkinter.Label(root, text="Separation:")
-labelAFPred.grid(row=5, column=10)
+labelAFPred.grid(row=6, column=10)
 entryAFPred = tkinter.Entry(root, bd=5)
 entryAFPred.insert(0, str(avoidFactorPred))
-entryAFPred.grid(row=5, column=11)
+entryAFPred.grid(row=6, column=11)
 
 # Entry the match speed factor for the predators
 matchingFactorPred = 0.05
 
 labelMFPred = tkinter.Label(root, text="Alignment:")
-labelMFPred.grid(row=6, column=6)
+labelMFPred.grid(row=7, column=6)
 entryMFPred = tkinter.Entry(root, bd=5)
 entryMFPred.insert(0, str(matchingFactorPred))
-entryMFPred.grid(row=6, column=7)
+entryMFPred.grid(row=7, column=7)
 
 # Entry the avoid predator factor for the predators
 avoidPredatorFactorPred = 0.5
 
 labelAPFPred = tkinter.Label(root, text="Pred separation:")
-labelAPFPred.grid(row=6, column=8)
+labelAPFPred.grid(row=7, column=8)
 entryAPFPred = tkinter.Entry(root, bd=5)
 entryAPFPred.insert(0, str(avoidPredatorFactorPred))
-entryAPFPred.grid(row=6, column=9)
+entryAPFPred.grid(row=7, column=9)
 
 # Entry the visual range for the predators
 visualRangePred = 75
 
 labelVRPred = tkinter.Label(root, text="Visual range:")
-labelVRPred.grid(row=6, column=10)
+labelVRPred.grid(row=7, column=10)
 entryVRPred = tkinter.Entry(root, bd=5)
 entryVRPred.insert(0, str(visualRangePred))
-entryVRPred.grid(row=6, column=11)
+entryVRPred.grid(row=7, column=11)
 
 # Wind title
 labelWind = tkinter.Label(root, text="Wind")
-labelWind.grid(row=7, column=6, columnspan=6)
+labelWind.grid(row=8, column=6, columnspan=6)
 
 # Entry the wind X direction
 windX = 1
 
 labelWX = tkinter.Label(root, text="Wind X:")
-labelWX.grid(row=8, column=6)
+labelWX.grid(row=9, column=6)
 entryWX = tkinter.Entry(root, bd=5)
 entryWX.insert(0, str(windX))
-entryWX.grid(row=8, column=7)
+entryWX.grid(row=9, column=7)
 
 # Entry the wind Y direction
 windY = 1
 
 labelWY = tkinter.Label(root, text="Wind Y:")
-labelWY.grid(row=8, column=8)
+labelWY.grid(row=9, column=8)
 entryWY = tkinter.Entry(root, bd=5)
 entryWY.insert(0, str(windY))
-entryWY.grid(row=8, column=9)
+entryWY.grid(row=9, column=9)
 
 # Entry the wind factor
 windFactor = 0
 
 labelWF = tkinter.Label(root, text="Wind force:")
-labelWF.grid(row=8, column=10)
+labelWF.grid(row=9, column=10)
 entryWF = tkinter.Entry(root, bd=5)
 entryWF.insert(0, str(windFactor))
-entryWF.grid(row=8, column=11)
+entryWF.grid(row=9, column=11)
 
 # Statistics title
 labelWind = tkinter.Label(root, text="Statistics")
-labelWind.grid(row=9, column=6, columnspan=6)
+labelWind.grid(row=10, column=6, columnspan=6)
 
 # Boids numbers in screen
 labelShowBoids = tkinter.Label(root, text="Boids:")
-labelShowBoids.grid(row=10, column=6)
+labelShowBoids.grid(row=11, column=6)
 labelNumBoids = tkinter.Label(root, text=str(len(boids)))
-labelNumBoids.grid(row=10, column=7)
+labelNumBoids.grid(row=11, column=7)
 
 # Predator numbers in screen
 labelShowPreds = tkinter.Label(root, text="Preds:")
-labelShowPreds.grid(row=10, column=8)
+labelShowPreds.grid(row=11, column=8)
 labelNumPreds = tkinter.Label(root, text=str(len(preds)))
-labelNumPreds.grid(row=10, column=9)
+labelNumPreds.grid(row=11, column=9)
 
 # Obtain first batch of boids and predators
 initBoids(numBoids)
