@@ -219,11 +219,7 @@ def killPrey(pred):
                 boids.remove(otherBoid)
 
 
-# Main loop
-def animationLoop():
-    global loopCount
-
-    # Update each boid
+def updateBoids(boids):
     for boid in boids:
         # Velocity updates
         flyTowardsCenter(boid)
@@ -240,7 +236,10 @@ def animationLoop():
         boid["history"].append((boid["x"], boid["y"]))
         boid["history"] = boid["history"][-50:]
 
-    # Update each predator
+    return boids
+
+
+def updatePredators(preds):
     for pred in preds:
         # Velocity updates
         flyTowardsCenterPredators(pred)
@@ -257,7 +256,12 @@ def animationLoop():
         pred["history"].append((pred["x"], pred["y"]))
         pred["history"] = pred["history"][-50:]
 
-    # Clear the canvas and redraw all the boids and predators with their new positions
+    return preds
+
+
+def updateCanvas():
+    global loopCount
+
     myCanvas.delete("all")
     for boid in boids:
         myCanvas.create_oval(boid["x"], boid["y"],
@@ -282,7 +286,6 @@ def animationLoop():
     time.sleep(0.01)
     loopCount += 1
     root.update()
-    animationLoop()
 
 
 def reset():
@@ -533,7 +536,18 @@ initBoids(numBoids)
 initPredators(numPredators)
 
 # Start the loop
-animationLoop()
+T = True
+while T:
+    # Update each boid
+    updateBoids(boids)
+
+    # Update each predator
+    updatePredators(preds)
+
+    # Clear the canvas and redraw all the boids and predators with their new positions
+    updateCanvas()
+
+    T = True
 
 # Show
 root.mainloop()
